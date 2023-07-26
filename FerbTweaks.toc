@@ -1,0 +1,7 @@
+## Interface: 11200
+## Title: FerbTweaks
+## Notes: My lil tweaks
+
+FerbTweaks.lua
+
+mods\ToggleCombatFrames.lua
