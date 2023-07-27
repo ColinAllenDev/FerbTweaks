@@ -4,60 +4,38 @@ local module = FerbTweaks:register({
     enabled = true,
 })
 
-module.enable = function(self)
+module.enable = function(self)    
+    -- Conditions
+    local canHide = true;
     local isHidden = nil
-    local inCombat = UnitAffectingCombat("player")
-    local frames = { PlayerFrame, MainActionBar }
 
+    -- Show UI Frames
     local function ShowFrames()
-        for _, frame in pairs(frames) do
-            frame:Show()
-        end
+        -- Player Frame
+        PlayerFrame:Show()
+        -- Bongos
+        SlashCmdList["BongosCOMMAND"]("show all")
+        SlashCmdList["BongosCOMMAND"]("hide 3")
+        SlashCmdList["BongosCOMMAND"]("hide stats")
+
         isHidden = false
     end
 
+    -- Hide UI Frames
     local function HideFrames()
-        for _, frame in pairs(frames) do
-            frame:Hide()
+        if (canHide == false) then
+            do return end
         end
-        isHidden = true
-    end
-
-    HideFrames()
-
-    local function UpdateUI(self, event)
-        print("Event", event)
-        if ((event == "PLAYER_ENTER_COMBAT") or (event == "PLAYER_REGEN_DISABLED")) then
-            print("FT: Player Entered Combat, Revealing UI Frames")
-            ShowFrames()
-        end
-
-        if ((event == "PLAYER_LEAVE_COMBAT") or (event == "PLAYER_REGEN_ENABLED")) then
-            print("FT: Player Left Combat, Hiding UI Frames")
-            HideFrames()
-        end
-    end
-
-    local function overlay(parent) 
-        local f = CreateFrame("Button")
-        f:SetAllPoints(parent)
-        f:EnableMouse(true)
-        f:RegisterForClicks('LeftButtonUp', 'RightButtonUp',
-        'Middle Button Up', 'Button4Up', 'Button5Up')
         
-        f:SetScript("OnEnter", function()
-            parent:Show()
-        end)
+        -- Player Frame
+        PlayerFrame:Hide()
+        -- Bongos
+        SlashCmdList["BongosCOMMAND"]("hide all")
 
-        f:SetScript("OnLeave", function() 
-                parent:Hide()
-        end)
+        isHidden = true;
     end
 
-    for _, frame in pairs(frames) do
-        overlay(frame)
-    end    
-    
+    -- Events
     local hideEvents = CreateFrame("Frame", nil, UIParent)
     local showEvents = CreateFrame("Frame", nil, UIParent)
     hideEvents:RegisterEvent("PLAYER_LEAVE_COMBAT")
@@ -67,4 +45,34 @@ module.enable = function(self)
 
     hideEvents:SetScript("OnEvent", HideFrames)
     showEvents:SetScript("OnEvent", ShowFrames)
+
+    -- Hide frames by default
+    local mainFrame = CreateFrame("Frame", nil, UIParent)
+    mainFrame:RegisterEvent("PLAYER_LOGIN")
+    mainFrame:SetScript("OnEvent", function()
+        HideFrames()
+    end);
+
+    -- Slash Commands
+    local function FerbCommands(msg, editbox)
+        if msg == '' then
+            if (isHidden == true) then
+                canHide = false
+                ShowFrames()
+            else
+                canHide = true;
+                HideFrames()
+            end
+        elseif msg == 'show' then
+            canHide = false
+            ShowFrames()
+        elseif msg == 'hide' then
+            canHide = true
+            HideFrames()
+        end
+    end
+      
+    SLASH_FERB1 = '/ferb'
+    SlashCmdList["FERB"] = FerbCommands
+
 end
