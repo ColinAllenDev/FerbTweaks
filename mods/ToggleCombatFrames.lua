@@ -7,10 +7,15 @@ local module = FerbTweaks:register({
 module.enable = function(self)    
     -- Conditions
     local canHide = true;
+    local canShow = true;
     local isHidden = nil
 
     -- Show UI Frames
     local function ShowFrames()
+        if (canShow == false) then
+            do return end
+        end
+
         -- Player Frame
         PlayerFrame:Show()
         -- Bongos
@@ -68,7 +73,16 @@ module.enable = function(self)
             ShowFrames()
         elseif msg == 'hide' then
             canHide = true
+            canShow = false
             HideFrames()
+        elseif msg == 'toggle' then
+            canHide = true
+            canShow = true
+            if (isHidden == true) then
+                ShowFrames()
+            else
+                HideFrames()
+            end
         end
     end
       
